@@ -1,16 +1,16 @@
 /*
- * eloop_port.h
+ * port_linux.h
  *
  *  Created on: 20200201
  *      Author: luyunyi
  */
 
-#ifndef MAIN_ELOOP_ELOOP_PORT_H_
-#define MAIN_ELOOP_ELOOP_PORT_H_
+#ifndef __PORT_LINUX_H__
+#define __PORT_LINUX_H__
 
 #include "eloop_config.h"
 
-#if (ELOOP_PLATFORM_ESP8266==1)
+#if (ELOOP_PLATFORM_LINUX==1)
 
 #include "eloop_config.h"
 #include "eloop_microdef.h"

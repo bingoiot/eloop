@@ -15,7 +15,7 @@
 #define ELOOP_EXTERNAL_MEM_HEAP             1
 #define ELOOP_ENABLE_MICRO_DEFINE			1
 #define ELOOP_ENABLE_CJSON					1
-#define ELOOP_ENABLE_EFS					1
+#define ELOOP_ENABLE_ECDH					0
 
 #define ELOOP_PWRCONSERVE_LIMIT_TIME	(10)//the limit time of enter power conserve(sleep)
 

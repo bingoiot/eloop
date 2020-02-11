@@ -1,46 +1,27 @@
 /*
- * eloop_port.c
+ * port_esp8266.c
  *
  *  Created on: 20200201
  *      Author: luyunyi
  */
-
 #include "eloop_config.h"
 
 #if (ELOOP_PLATFORM_ESP8266==1)
 
-#include "unistd.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include <netdb.h>
-#include <sys/socket.h>
-//#include <sys/msg.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include "time.h"
-#include "sys/time.h"
-#include "pthread.h"
-#include "stdarg.h"
+#include <time.h>
+#include <errno.h>
+#include <pthread.h>
 #include <string.h>
-#include <stdlib.h>
-#include <sys/vfs.h>
-#include <stdio.h>
-#include <signal.h>
-#include <sys/stat.h>
-
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<arpa/inet.h>
-#include<unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include<sys/wait.h>
-#include <string.h>
-#include <sys/sysinfo.h>
+#include "esp_err.h"
+#include "esp_attr.h"
+#include "sys/queue.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "esp_pthread.h"
 
 #include "eloop.h"
+#include "port_esp8266.h"
 
 static pthread_mutex_t myMutex;
 static void  *Eloop_Thread1(void *arg);
@@ -56,31 +37,23 @@ int  eloop_init(void)
 	{
 		ret = pthread_create(&id,NULL,Eloop_Thread1,NULL);
 		ret = pthread_create(&id,NULL,Eloop_Thread2,NULL);
+		//xTaskCreate(Eloop_Thread1, "Eloop_Thread1", 1024, NULL, (tskIDLE_PRIORITY + 3), NULL);
+		//xTaskCreate(Eloop_Thread2, "Eloop_Thread2", (1024*6), NULL, (tskIDLE_PRIORITY + 3), NULL);
 	}
 	eloop_log(DBG_EPORT,"eloop_port_init:succeed !\r\n");
 	return ret;
 }
-void  eloop_enter_critical(void)
-{
-	pthread_mutex_lock(&myMutex);
-}
-void  eloop_exit_critical(void)
-{
-	pthread_mutex_unlock(&myMutex);
-}
+
 void eloop_sleep(uint32 tim)
 {
-	usleep(tim/1000);
+	vTaskDelay(tim/portTICK_PERIOD_MS);
 }
+
 #if	(ELOOP_EXTERNAL_MEM_HEAP==1)
 
 s_int32 eloop_get_free_heap(void)
 {
-	struct sysinfo si;
-	sysinfo(&si);
-	eloop_log(DBG_EPORT,"Totalram:%d\n", (int)si.totalram);
-	eloop_log(DBG_EPORT,"Available:%d\n", (int)si.freeram);
-	return si.freeram;
+	return esp_get_free_heap_size();
 }
 void *eloop_malloc(s_int32 size)
 {
@@ -92,6 +65,16 @@ void eloop_free(void* p)
 }
 
 #endif
+
+void  eloop_enter_critical(void)
+{
+	pthread_mutex_lock(&myMutex);
+}
+void  eloop_exit_critical(void)
+{
+	pthread_mutex_unlock(&myMutex);
+}
+
 static void  *Eloop_Thread1(void *arg)
 {
 	struct timeval tv;
@@ -112,17 +95,21 @@ static void  *Eloop_Thread1(void *arg)
 			last = tim ;
 			eloop_update_tick(temp);//update per 2ms
 		}
-		usleep(5000);
+		eloop_sleep(10);
 	}
+	return NULL;
 }
 static void  *Eloop_Thread2(void *arg)
 {
 	eloop_log(DBG_EPORT,"Eloop_Thread2: run 1... !\r\n");
 	while(1)
 	{
-		eloop_task_poll();
-		usleep(5000);
+		if(eloop_task_poll()==ES_TASK_IDLE)
+		{
+			eloop_sleep(10);
+		}
 	}
+	return NULL;
 }
 
 #endif
