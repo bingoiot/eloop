@@ -11,7 +11,7 @@
 #include "eloop_message.h"
 #include "eloop_lib.h"
 #include "eloop_log.h"
-#include "eloop_port.h"
+#include "eloop.h"
 
 eMessage_t 	*_create_message(void *msg, s_int32 len);
 void 		*_create_stream(void *msg, s_int32 len);

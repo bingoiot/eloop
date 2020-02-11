@@ -11,8 +11,8 @@
 #include "eloop_lib.h"
 #include "eloop_timer.h"
 #include "eloop_message.h"
-#include "eloop_port.h"
 #include "eloop_log.h"
+#include "eloop.h"
 
 static s_int8 					_task_run(void);
 static eTStack_t*				_unsafe_get_free_task(void);

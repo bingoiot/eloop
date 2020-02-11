@@ -7,8 +7,8 @@
 
 #include "eloop_microdef.h"
 #include "eloop_heap.h"
-#include "eloop_port.h"
 #include "stdlib.h"
+#include "eloop.h"
 
 #if (ELOOP_EXTERNAL_MEM_HEAP==0)
 

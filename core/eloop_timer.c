@@ -12,7 +12,7 @@
 #include "eloop_timer.h"
 #include "eloop_heap.h"
 #include "eloop_log.h"
-#include "eloop_port.h"
+#include "eloop.h"
 
 typedef enum
 {

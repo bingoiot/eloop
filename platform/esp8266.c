@@ -4,6 +4,11 @@
  *  Created on: 20200201
  *      Author: luyunyi
  */
+
+#include "eloop_config.h"
+
+#if (ELOOP_PLATFORM_ESP8266==1)
+
 #include "unistd.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -36,7 +41,6 @@
 #include <sys/sysinfo.h>
 
 #include "eloop.h"
-#include "eloop_port.h"
 
 static pthread_mutex_t myMutex;
 static void  *Eloop_Thread1(void *arg);
@@ -56,6 +60,38 @@ int  eloop_init(void)
 	eloop_log(DBG_EPORT,"eloop_port_init:succeed !\r\n");
 	return ret;
 }
+void  eloop_enter_critical(void)
+{
+	pthread_mutex_lock(&myMutex);
+}
+void  eloop_exit_critical(void)
+{
+	pthread_mutex_unlock(&myMutex);
+}
+void eloop_sleep(uint32 tim)
+{
+	usleep(tim/1000);
+}
+#if	(ELOOP_EXTERNAL_MEM_HEAP==1)
+
+s_int32 eloop_get_free_heap(void)
+{
+	struct sysinfo si;
+	sysinfo(&si);
+	eloop_log(DBG_EPORT,"Totalram:%d\n", (int)si.totalram);
+	eloop_log(DBG_EPORT,"Available:%d\n", (int)si.freeram);
+	return si.freeram;
+}
+void *eloop_malloc(s_int32 size)
+{
+	return malloc(size);
+}
+void eloop_free(void* p)
+{
+	free(p);
+}
+
+#endif
 static void  *Eloop_Thread1(void *arg)
 {
 	struct timeval tv;
@@ -89,39 +125,7 @@ static void  *Eloop_Thread2(void *arg)
 	}
 }
 
-void  eloop_enter_critical(void)
-{
-	pthread_mutex_lock(&myMutex);
-}
-void  eloop_exit_critical(void)
-{
-	pthread_mutex_unlock(&myMutex);
-}
-void eloop_sleep(uint32 tim)
-{
-	usleep(tim/1000);
-}
-
-
-#if	(ELOOP_EXTERNAL_MEM_HEAP==1)
-
-s_int32 eloop_get_free_heap(void)
-{
-	struct sysinfo si;
-	sysinfo(&si);
-	eloop_log(DBG_EPORT,"Totalram:%d\n", (int)si.totalram);
-	eloop_log(DBG_EPORT,"Available:%d\n", (int)si.freeram);
-	return si.freeram;
-}
-void *eloop_malloc(s_int32 size)
-{
-	return malloc(size);
-}
-void eloop_free(void* p)
-{
-	free(p);
-}
-
 #endif
+
 
 

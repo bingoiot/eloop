@@ -8,6 +8,7 @@
 #include "eloop_microdef.h"
 #include "eloop_list.h"
 #include "eloop_heap.h"
+#include "eloop.h"
 
 s_int8 eloop_list_insert(void **list, void *msg)
 {

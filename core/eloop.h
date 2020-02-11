@@ -16,13 +16,13 @@
 
 extern int		    eloop_init(void);
 extern void  	    eloop_enter_critical(void);
-extern void  	    eloop_exit_critical1(void);
+extern void  	    eloop_exit_critical(void);
 extern void 		eloop_sleep(uint32 tim);
 
 extern void 		eloop_set_power_conserve(u_int8 enable);
 extern s_int8 		eloop_create_task(eloop_task_t task,u_int8 priority);
 extern s_int8 		eloop_delete_task(eloop_task_t task);
-extern s_int8 		eloop_update_tick(u_int32 tick);
+extern void 		eloop_update_tick(u_int32 tick);
 extern s_int8 		eloop_task_poll(void);
 extern s_int8 		eloop_set_event(eloop_task_t task, u_int32 event);
 extern s_int8 		eloop_clear_event(eloop_task_t task, u_int32 event);
