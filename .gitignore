@@ -1,0 +1,7 @@
+*.o
+.vscode/
+CMakeFiles/
+sig-mesh-demo
+CMakeCache.txt
+cmake_install.cmake
+Makefile
