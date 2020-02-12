@@ -21,26 +21,26 @@
 #include "esp_pthread.h"
 
 #include "eloop.h"
-#include "port_esp8266.h"
+#include "eloop_core.h"
+#include "eloop_platform.h"
 
 static pthread_mutex_t myMutex;
 static void  *Eloop_Thread1(void *arg);
-static void  *Eloop_Thread2(void *arg);
 
 int  eloop_init(void)
 {
 	pthread_t id;
+	eloop_core_init(NULL);
 	int ret = pthread_mutex_init(&myMutex,NULL);
 	if(ret<0)
 		eloop_log(DBG_EPORT,"eloop_port_init:pthread_mutex_init error !\r\n");
 	else
 	{
 		ret = pthread_create(&id,NULL,Eloop_Thread1,NULL);
-		ret = pthread_create(&id,NULL,Eloop_Thread2,NULL);
-		//xTaskCreate(Eloop_Thread1, "Eloop_Thread1", 1024, NULL, (tskIDLE_PRIORITY + 3), NULL);
-		//xTaskCreate(Eloop_Thread2, "Eloop_Thread2", (1024*6), NULL, (tskIDLE_PRIORITY + 3), NULL);
+		//ret = pthread_create(&id,NULL,Eloop_Thread2,NULL);
+		//xTaskCreate(Eloop_Thread1, "Eloop_Thread1",(1024*6), NULL, (tskIDLE_PRIORITY + 3), NULL);
+		eloop_log(DBG_EPORT,"eloop_port_init:succeed !\r\n");
 	}
-	eloop_log(DBG_EPORT,"eloop_port_init:succeed !\r\n");
 	return ret;
 }
 
@@ -68,46 +68,35 @@ void eloop_free(void* p)
 
 void  eloop_enter_critical(void)
 {
+	eloop_log(0,"pthread_mutex_lock\r\n");
 	pthread_mutex_lock(&myMutex);
 }
 void  eloop_exit_critical(void)
 {
+	eloop_log(0,"pthread_mutex_unlock\r\n");
 	pthread_mutex_unlock(&myMutex);
 }
-
+extern void esp_task_wdt_reset(void);
 static void  *Eloop_Thread1(void *arg)
 {
-	struct timeval tv;
-	struct timezone tz;
-	u_int32 tim;
-	u_int32 temp;
-	u_int32 last;
-	gettimeofday(&tv,&tz);
-	last = (tv.tv_usec/1000)+(tv.tv_sec*1000);
+	static uint32 last = 0;
+	uint32	temp,now;
 	eloop_log(DBG_EPORT,"Eloop_Thread1: run 1... !\r\n");
 	while(1)
 	{
-		gettimeofday(&tv,&tz);
-		tim = (tv.tv_usec/1000)+(tv.tv_sec*1000);
-		temp = eloop_sub32_loop(tim,last);
-		if(temp>=5)
+		now = xTaskGetTickCount();
+		temp = eloop_sub32_loop(now,last)*portTICK_PERIOD_MS;
+		last = now;
+		eloop_update_tick(temp);//update per 2ms
+		temp = 5;
+		while(temp--)
 		{
-			last = tim ;
-			eloop_update_tick(temp);//update per 2ms
+			if(eloop_task_poll()==ES_TASK_IDLE)
+			{
+				break;
+			}
 		}
-		eloop_sleep(10);
-	}
-	return NULL;
-}
-static void  *Eloop_Thread2(void *arg)
-{
-	eloop_log(DBG_EPORT,"Eloop_Thread2: run 1... !\r\n");
-	while(1)
-	{
-		if(eloop_task_poll()==ES_TASK_IDLE)
-		{
-			eloop_sleep(10);
-		}
+		esp_task_wdt_reset();
 	}
 	return NULL;
 }

@@ -41,6 +41,8 @@
 #include <sys/sysinfo.h>
 
 #include "eloop.h"
+#include "eloop_core.h"
+#include "eloop_platform.h"
 
 static pthread_mutex_t myMutex;
 static void  *Eloop_Thread1(void *arg);
@@ -49,6 +51,7 @@ static void  *Eloop_Thread2(void *arg);
 int  eloop_init(void)
 {
 	pthread_t id;
+	eloop_core_init(NULL);
 	int ret = pthread_mutex_init(&myMutex,NULL);
 	if(ret<0)
 		eloop_log(DBG_EPORT,"eloop_port_init:pthread_mutex_init error !\r\n");

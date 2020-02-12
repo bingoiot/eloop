@@ -62,8 +62,7 @@ s_int8 eloop_create_task(eloop_task_t task,u_int8 priority)
 }
 s_int8 eloop_task_poll(void)
 {
-	_task_run();
-	return 0;
+	return _task_run();
 }
 eTStack_t* eloop_find_task(eloop_task_t task)
 {

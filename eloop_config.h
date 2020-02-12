@@ -11,6 +11,7 @@
 #include "stdlib.h"
 
 #define ELOOP_PLATFORM_ESP8266              1
+#define ELOOP_PLATFORM_LINUX                0
 
 #define ELOOP_EXTERNAL_MEM_HEAP             1
 #define ELOOP_ENABLE_MICRO_DEFINE			1
