@@ -37,8 +37,6 @@ int  eloop_init(void)
 	else
 	{
 		ret = pthread_create(&id,NULL,Eloop_Thread1,NULL);
-		//ret = pthread_create(&id,NULL,Eloop_Thread2,NULL);
-		//xTaskCreate(Eloop_Thread1, "Eloop_Thread1",(1024*6), NULL, (tskIDLE_PRIORITY + 3), NULL);
 		eloop_log(DBG_EPORT,"eloop_port_init:succeed !\r\n");
 	}
 	return ret;
@@ -95,8 +93,9 @@ static void  *Eloop_Thread1(void *arg)
 			{
 				break;
 			}
+			esp_task_wdt_reset();
 		}
-		esp_task_wdt_reset();
+		eloop_sleep(10);
 	}
 	return NULL;
 }
