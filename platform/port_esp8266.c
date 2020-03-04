@@ -19,6 +19,7 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "esp_pthread.h"
+#include "esp_system.h"
 
 #include "eloop.h"
 #include "eloop_core.h"
