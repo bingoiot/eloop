@@ -43,7 +43,7 @@ s_int8 eloop_list_insert_front(void **list, void *msg)
 	}
 	return ES_SUCCEED;
 }
-void *eloop_list_detach(void **list)
+void *eloop_list_detach_front(void **list)
 {
 	eList_t *pcur;
 	pcur = *list;
@@ -55,7 +55,7 @@ void *eloop_list_detach(void **list)
 	}
 	return NULL;
 }
-void *eloop_list_detach_front(void **list)
+void *eloop_list_detach(void **list)
 {
 	eList_t *pcur,*pre;
 	pcur = *list;

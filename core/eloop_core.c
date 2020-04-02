@@ -128,7 +128,7 @@ s_int8 eloop_set_event(eloop_task_t task, u_int32 event)
 	u_int8			ret = ES_FAILED;
 	eloop_log(DBG_ECORE,"eloop_set_event! task:%08x ,event:%08x \r\n",(int)task,event);
 	eloop_enter_critical();
-	eloop_unsafe_set_event(task,event);
+	ret = eloop_unsafe_set_event(task,event);
 	eloop_exit_critical();
 	return ret;
 }
@@ -137,7 +137,7 @@ s_int8 eloop_clear_event(eloop_task_t task, u_int32 event)
 	u_int8			ret = ES_FAILED;
 	eloop_log(DBG_ECORE,"eloop_clear_event! task:%08x ,event:%08x \r\n",(int)task,event);
 	eloop_enter_critical();
-	eloop_unsafe_clear_event(task,event);
+	ret = eloop_unsafe_clear_event(task,event);
 	eloop_exit_critical();
 	return ret;
 }
