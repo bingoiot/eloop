@@ -28,7 +28,7 @@ extern "C"
 {
 #endif
 
-#if ELOOP_ENABLE_CJSON
+#if EPOLL_ENABLE_CJSON
 
 /* cJSON Types: */
 #define cJSON_False 0

@@ -1,10 +1,10 @@
-# eloop 
+# epoll 
 
-* eloop drived by event and message schedule. 
-* eloop contain a event loop scheduld. 
-* eloop contain a timer scheduld. 
-* eloop contain a list table. 
-* eloop contain message queue schedule. 
+* epoll drived by event and message schedule. 
+* epoll contain a event loop scheduld. 
+* epoll contain a timer scheduld. 
+* epoll contain a list table. 
+* epoll contain message queue schedule. 
 
-#eloop test
-* eloop example tested by unbuntu x86_64 system.
+#epoll test
+* epoll example tested by unbuntu x86_64 system.

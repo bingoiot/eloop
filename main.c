@@ -7,13 +7,13 @@
 
 #include "stdio.h"
 #include "unistd.h"
-#include "eloop.h"
-void eloop_exampe_init(void);
+#include "epoll.h"
+void epoll_exampe_init(void);
 int main(void *arg)
 {
 
 	printf("hello cmake\r\n");
-	eloop_exampe_init();
+	epoll_exampe_init();
 	while(1) sleep(1);
 	return 0;
 }

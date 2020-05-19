@@ -22,10 +22,10 @@
 
 /* cJSON */
 /* JSON parser in C. */
-#include "eloop.h"
+#include "epoll.h"
 #include "cJSON.h"
 
-#if ELOOP_ENABLE_CJSON
+#if EPOLL_ENABLE_CJSON
 
 static const char *ep;
 
@@ -55,24 +55,24 @@ static int FUC_ATTR cJSON_strcasecmp(const char *s1,const char *s2)
 	return cJSON_tolower(*(const unsigned char *)s1) - cJSON_tolower(*(const unsigned char *)s2);
 }
 
-#define cJSON_malloc(sz)  	eloop_malloc(sz)
-#define cJSON_free(x) 		eloop_free(x)
+#define cJSON_malloc(sz)  	epoll_malloc(sz)
+#define cJSON_free(x) 		epoll_free(x)
 
 static char FUC_ATTR *cJSON_strdup(const char* str)
 {
       size_t len;
       char* copy;
 
-      len = eloop_strlen(str) + 1;
+      len = epoll_strlen(str) + 1;
       if (!(copy = (char*)cJSON_malloc(len))) return 0;
-      eloop_memcpy(copy,str,len);
+      epoll_memcpy(copy,str,len);
       return copy;
 }
 /* Internal constructor. */
 static cJSON FUC_ATTR *cJSON_New_Item(void)
 {
 	cJSON* node = (cJSON*)cJSON_malloc(sizeof(cJSON));
-	if (node) eloop_memset(node,0,sizeof(cJSON));
+	if (node) epoll_memset(node,0,sizeof(cJSON));
 	return node;
 }
 
@@ -136,7 +136,7 @@ static char FUC_ATTR *ensure(printbuffer *p,int needed)
 	newsize=pow2gt(needed);
 	newbuffer=(char*)cJSON_malloc(newsize);
 	if (!newbuffer) {cJSON_free(p->buffer);p->length=0,p->buffer=0;return 0;}
-	if (newbuffer) eloop_memcpy(newbuffer,p->buffer,p->length);
+	if (newbuffer) epoll_memcpy(newbuffer,p->buffer,p->length);
 	cJSON_free(p->buffer);
 	p->length=newsize;
 	p->buffer=newbuffer;
@@ -148,7 +148,7 @@ static int FUC_ATTR update(printbuffer *p)
 	char *str;
 	if (!p || !p->buffer) return 0;
 	str=p->buffer+p->offset;
-	return p->offset+eloop_strlen(str);
+	return p->offset+epoll_strlen(str);
 }
 
 /* Render the number nicely from the given item into a string. */
@@ -163,7 +163,7 @@ static char FUC_ATTR *print_number(cJSON *item,printbuffer *p)
 		else
 			str=(char*)cJSON_malloc(2);	/* special case for 0. */
 		if (str)
-			eloop_strcpy(str,"0");
+			epoll_strcpy(str,"0");
 	}
 	else
 	{
@@ -172,7 +172,7 @@ static char FUC_ATTR *print_number(cJSON *item,printbuffer *p)
 		else
 			str=(char*)cJSON_malloc(21);	/* 2^64+1 can be represented in 21 chars. */
 		if (str)
-			ELOOP_SPRINT(str,"%d",item->valueint);
+			EPOLL_SPRINT(str,"%d",item->valueint);
 	}
 	return str;
 }
@@ -264,7 +264,7 @@ static char FUC_ATTR *print_string_ptr(const char *str,printbuffer *p)
 		else		out=(char*)cJSON_malloc(len+3);
 		if (!out) return 0;
 		ptr2=out;*ptr2++='\"';
-		eloop_strcpy(ptr2,str);
+		epoll_strcpy(ptr2,str);
 		ptr2[len]='\"';
 		ptr2[len+1]=0;
 		return out;
@@ -275,7 +275,7 @@ static char FUC_ATTR *print_string_ptr(const char *str,printbuffer *p)
 		if (p)	out=ensure(p,3);
 		else	out=(char*)cJSON_malloc(3);
 		if (!out) return 0;
-		eloop_strcpy(out,"\"\"");
+		epoll_strcpy(out,"\"\"");
 		return out;
 	}
 	ptr=str;while ((token=*ptr) && ++len) {if (strchr("\"\\\b\f\n\r\t",token)) len++; else if (token<32) len+=5;ptr++;}
@@ -301,7 +301,7 @@ static char FUC_ATTR *print_string_ptr(const char *str,printbuffer *p)
 				case '\n':	*ptr2++='n';	break;
 				case '\r':	*ptr2++='r';	break;
 				case '\t':	*ptr2++='t';	break;
-				default: ELOOP_SPRINT(ptr2,"u%04x",token);ptr2+=5;	break;	/* escape and print */
+				default: EPOLL_SPRINT(ptr2,"u%04x",token);ptr2+=5;	break;	/* escape and print */
 			}
 		}
 	}
@@ -360,16 +360,16 @@ char FUC_ATTR *cJSON_PrintBuffered(cJSON *item,int prebuffer,int fmt)
 static const char FUC_ATTR *parse_value(cJSON *item,const char *value)
 {
 	if (!value)						return 0;	/* Fail on null. */
-	if (!eloop_strncmp(value,"null",4))
+	if (!epoll_strncmp(value,"null",4))
 	{
 		item->type=cJSON_NULL;
 		return value+4;
 	}
-	if (!eloop_strncmp(value,"false",5))
+	if (!epoll_strncmp(value,"false",5))
 	{
 		item->type=cJSON_False; return value+5;
 	}
-	if (!eloop_strncmp(value,"true",4))
+	if (!epoll_strncmp(value,"true",4))
 	{
 		item->type=cJSON_True;
 		item->valueint=1;
@@ -404,9 +404,9 @@ static char FUC_ATTR *print_value(cJSON *item,int depth,int fmt,printbuffer *p)
 	{
 		switch ((item->type)&255)
 		{
-			case cJSON_NULL:	{out=ensure(p,5);	if (out) eloop_strcpy(out,"null");	break;}
-			case cJSON_False:	{out=ensure(p,6);	if (out) eloop_strcpy(out,"false");	break;}
-			case cJSON_True:	{out=ensure(p,5);	if (out) eloop_strcpy(out,"true");	break;}
+			case cJSON_NULL:	{out=ensure(p,5);	if (out) epoll_strcpy(out,"null");	break;}
+			case cJSON_False:	{out=ensure(p,6);	if (out) epoll_strcpy(out,"false");	break;}
+			case cJSON_True:	{out=ensure(p,5);	if (out) epoll_strcpy(out,"true");	break;}
 			case cJSON_Number:	out=print_number(item,p);break;
 			case cJSON_String:	out=print_string(item,p);break;
 			case cJSON_Array:	out=print_array(item,depth,fmt,p);break;
@@ -473,7 +473,7 @@ static char FUC_ATTR *print_array(cJSON *item,int depth,int fmt,printbuffer *p)
 	{
 		if (p)	out=ensure(p,3);
 		else	out=(char*)cJSON_malloc(3);
-		if (out) eloop_strcpy(out,"[]");
+		if (out) epoll_strcpy(out,"[]");
 		return out;
 	}
 
@@ -498,14 +498,14 @@ static char FUC_ATTR *print_array(cJSON *item,int depth,int fmt,printbuffer *p)
 		/* Allocate an array to hold the values for each */
 		entries=(char**)cJSON_malloc(numentries*sizeof(char*));
 		if (!entries) return 0;
-		eloop_memset(entries,0,numentries*sizeof(char*));
+		epoll_memset(entries,0,numentries*sizeof(char*));
 		/* Retrieve all the results: */
 		child=item->child;
 		while (child && !fail)
 		{
 			ret=print_value(child,depth+1,fmt,0);
 			entries[i++]=ret;
-			if (ret) len+=eloop_strlen(ret)+2+(fmt?1:0); else fail=1;
+			if (ret) len+=epoll_strlen(ret)+2+(fmt?1:0); else fail=1;
 			child=child->next;
 		}
 		
@@ -527,7 +527,7 @@ static char FUC_ATTR *print_array(cJSON *item,int depth,int fmt,printbuffer *p)
 		ptr=out+1;*ptr=0;
 		for (i=0;i<numentries;i++)
 		{
-			tmplen=eloop_strlen(entries[i]);eloop_memcpy(ptr,entries[i],tmplen);ptr+=tmplen;
+			tmplen=epoll_strlen(entries[i]);epoll_memcpy(ptr,entries[i],tmplen);ptr+=tmplen;
 			if (i!=numentries-1) {*ptr++=',';if(fmt)*ptr++=' ';*ptr=0;}
 			cJSON_free(entries[i]);
 		}
@@ -639,8 +639,8 @@ static char FUC_ATTR *print_object(cJSON *item,int depth,int fmt,printbuffer *p)
 		if (!entries) return 0;
 		names=(char**)cJSON_malloc(numentries*sizeof(char*));
 		if (!names) {cJSON_free(entries);return 0;}
-		eloop_memset(entries,0,sizeof(char*)*numentries);
-		eloop_memset(names,0,sizeof(char*)*numentries);
+		epoll_memset(entries,0,sizeof(char*)*numentries);
+		epoll_memset(names,0,sizeof(char*)*numentries);
 
 		/* Collect all the results into our arrays: */
 		child=item->child;depth++;if (fmt) len+=depth;
@@ -648,7 +648,7 @@ static char FUC_ATTR *print_object(cJSON *item,int depth,int fmt,printbuffer *p)
 		{
 			names[i]=str=print_string_ptr(child->string,0);
 			entries[i++]=ret=print_value(child,depth,fmt,0);
-			if (str && ret) len+=eloop_strlen(ret)+eloop_strlen(str)+2+(fmt?2+depth:0); else fail=1;
+			if (str && ret) len+=epoll_strlen(ret)+epoll_strlen(str)+2+(fmt?2+depth:0); else fail=1;
 			child=child->next;
 		}
 		
@@ -669,9 +669,9 @@ static char FUC_ATTR *print_object(cJSON *item,int depth,int fmt,printbuffer *p)
 		for (i=0;i<numentries;i++)
 		{
 			if (fmt) for (j=0;j<depth;j++) *ptr++='\t';
-			tmplen=eloop_strlen(names[i]);eloop_memcpy(ptr,names[i],tmplen);ptr+=tmplen;
+			tmplen=epoll_strlen(names[i]);epoll_memcpy(ptr,names[i],tmplen);ptr+=tmplen;
 			*ptr++=':';if (fmt) *ptr++='\t';
-			eloop_strcpy(ptr,entries[i]);ptr+=eloop_strlen(entries[i]);
+			epoll_strcpy(ptr,entries[i]);ptr+=epoll_strlen(entries[i]);
 			if (i!=numentries-1) *ptr++=',';
 			if (fmt) *ptr++='\n';*ptr=0;
 			cJSON_free(names[i]);cJSON_free(entries[i]);
@@ -692,7 +692,7 @@ cJSON FUC_ATTR *cJSON_GetObjectItem(cJSON *object,const char *string)	{cJSON *c=
 /* Utility for array list handling. */
 static void FUC_ATTR suffix_object(cJSON *prev,cJSON *item) {prev->next=item;item->prev=prev;}
 /* Utility for handling references. */
-static cJSON FUC_ATTR *create_reference(cJSON *item) {cJSON *ref=cJSON_New_Item();if (!ref) return 0;eloop_memcpy(ref,item,sizeof(cJSON));ref->string=0;ref->type|=cJSON_IsReference;ref->next=ref->prev=0;return ref;}
+static cJSON FUC_ATTR *create_reference(cJSON *item) {cJSON *ref=cJSON_New_Item();if (!ref) return 0;epoll_memcpy(ref,item,sizeof(cJSON));ref->string=0;ref->type|=cJSON_IsReference;ref->next=ref->prev=0;return ref;}
 
 /* Add item to array/object. */
 void   FUC_ATTR cJSON_AddItemToArray(cJSON *array, cJSON *item)						{cJSON *c=array->child;if (!item) return; if (!c) {array->child=item;} else {while (c && c->next) c=c->next; suffix_object(c,item);}}
