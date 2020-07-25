@@ -10,6 +10,11 @@
 
 #include "stdlib.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #define ELOOP_PLATFORM_ESP8266              0
 #define ELOOP_PLATFORM_ESP32                0
 #define ELOOP_PLATFORM_LINUX                0
@@ -32,5 +37,8 @@
 #define DBG_ETIMER			(0)
 #define DBG_EERROR			(3)
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ELOOP_ELOOP_CONFIG_H_ */

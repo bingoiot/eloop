@@ -8,12 +8,19 @@
 #ifndef _ELOOP_LOG_H_
 #define _ELOOP_LOG_H_
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include "eloop_config.h"
 #include "eloop_microdef.h"
 #include "stdio.h"
 #include "string.h"
 
-void   _PrintB(char *s,u_int8 *pdata, s_int32 len);
+	void   _PrintB(char* s, u_int8* pdata, s_int32 len);
 
 
 #define eloop_log(fmt,...)\
@@ -31,5 +38,11 @@ void   _PrintB(char *s,u_int8 *pdata, s_int32 len);
 			if(fmt)		\
 				{_PrintB(__VA_ARGS__);}\
 		}while(0)
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* MAIN_ELOOP_ELOOP_LOG_H_ */
